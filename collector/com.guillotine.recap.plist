@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.guillotine.recap</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/local/bin/Rscript</string>
+    <string>/path/to/guillotine-fantasy-football/collector/weekly_recap.R</string>
+  </array>
+  <key>WorkingDirectory</key><string>/path/to/guillotine-fantasy-football</string>
+  <!-- Team names carry non-ASCII characters (c-cedilla, curly apostrophes); launchd's environment has no locale by default. -->
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>LANG</key><string>en_US.UTF-8</string>
+    <key>LC_ALL</key><string>en_US.UTF-8</string>
+  </dict>
+  <!-- Local (Mac) time. Tuesday morning: nflverse refreshes overnight, so Monday night's game is in the data by then.
+       Wednesday morning is the retry. A week that is already done is skipped, so the second run is normally a no-op.
+       A run missed while the Mac sleeps fires once when it wakes. -->
+  <key>StartCalendarInterval</key>
+  <array>
+    <dict><key>Weekday</key><integer>2</integer><key>Hour</key><integer>9</integer><key>Minute</key><integer>0</integer></dict>
+    <dict><key>Weekday</key><integer>3</integer><key>Hour</key><integer>9</integer><key>Minute</key><integer>0</integer></dict>
+  </array>
+  <key>StandardOutPath</key><string>/path/to/guillotine-fantasy-football/logs/recap.out.log</string>
+  <key>StandardErrorPath</key><string>/path/to/guillotine-fantasy-football/logs/recap.err.log</string>
+</dict>
+</plist>

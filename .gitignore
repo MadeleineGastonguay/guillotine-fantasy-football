@@ -1,0 +1,25 @@
+# R
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+Rplots.pdf
+.DS_Store
+
+# Your league: copy the *.example.* files, fill them in, and they stay on your machine
+league_config.R
+leagues/*.R
+!leagues/example_league.R
+collector/managers.csv
+collector/league_facts.txt
+
+# Generated output and local data (the recap site is published from its own repo)
+recap/
+data/
+accuracy_data/
+logs/
+rsconnect/
+cache/*
+!cache/backtest/
+cache/backtest/*
+!cache/backtest/calibration_summary_topn.rds

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.guillotine.preview</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/local/bin/Rscript</string>
+    <string>/path/to/guillotine-fantasy-football/collector/weekly_preview.R</string>
+  </array>
+  <key>WorkingDirectory</key><string>/path/to/guillotine-fantasy-football</string>
+  <!-- Team names carry non-ASCII characters (c-cedilla, curly apostrophes); launchd's environment has no locale by default. -->
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>LANG</key><string>en_US.UTF-8</string>
+    <key>LC_ALL</key><string>en_US.UTF-8</string>
+  </dict>
+  <!-- Local (Mac) time. The waivers run around 3am Eastern on Wednesday, so 9:30am is the real run (after the 9:00am recap retry).
+       12:00 is a retry in case the waiver run was late. Thursday 9:00am rebuilds the page if a Claude-written draft was saved after the first run
+       (a preview that is already done and has no new draft is skipped), ahead of Thursday night's game. A run missed while the Mac sleeps fires once when it wakes. -->
+  <key>StartCalendarInterval</key>
+  <array>
+    <dict><key>Weekday</key><integer>3</integer><key>Hour</key><integer>9</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Weekday</key><integer>3</integer><key>Hour</key><integer>12</integer><key>Minute</key><integer>0</integer></dict>
+    <dict><key>Weekday</key><integer>4</integer><key>Hour</key><integer>9</integer><key>Minute</key><integer>0</integer></dict>
+  </array>
+  <key>StandardOutPath</key><string>/path/to/guillotine-fantasy-football/logs/preview.out.log</string>
+  <key>StandardErrorPath</key><string>/path/to/guillotine-fantasy-football/logs/preview.err.log</string>
+</dict>
+</plist>
