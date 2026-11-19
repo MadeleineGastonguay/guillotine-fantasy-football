@@ -2,7 +2,7 @@
 
 A live tracker for **guillotine fantasy football leagues** on [Sleeper](https://sleeper.com), where the lowest-scoring team each week is eliminated ("chopped") and its players go up for bid. It shows, while the games are being played, each team's chance of being chopped. An optional add-on writes weekly recap and preview web pages.
 
-**Jump to:** [Why this exists](#why-this-exists) · [How the probabilities are calculated](#how-the-probabilities-are-calculated) · [Limits](#limits) · [Adapting it to your league](#adapting-it-to-your-league) · [Recap and preview pages (optional)](#recap-and-preview-pages-optional) · [License](#license)
+**Jump to:** [Why this exists](#why-this-exists) · [How the probabilities are calculated](#how-the-probabilities-are-calculated) · [How the recaps are generated](#how-the-recaps-are-generated-optional) · [Limits](#limits) · [Adapting it to your league](#adapting-it-to-your-league) · [For the app](#for-the-app) · [For the recap pages](#for-the-recap-pages-optional) · [License](#license)
 
 ---
 
@@ -25,6 +25,19 @@ Sleeper doesn't publish projections that update during games, so this app has it
 5. **From players to teams.** Each draw gives every player a final score, solves every team's best-ball lineup, and chops the lowest total. A team's chance is the share of draws in which it was lowest (or among the lowest few).
 
 The code also contains other variance models: PlayerProfiler's published CVs, and two built from a backtest of historical data (a position-level fit and a per-player one). Only the position-CV model is switched on. The two backtest-based models are experimental, because we have no good way to judge how realistic their spreads are. They are described in [`docs/how-it-works.md`](docs/how-it-works.md).
+
+## How the recaps are generated (optional)
+
+The recap and preview pages are an optional add-on. Each one is made by a script (`collector/weekly_recap.R` for a recap, `collector/weekly_preview.R` for a preview) in four steps:
+
+1. **Collect and compute.** The script reads the week from Sleeper (rosters, matchups, transactions), replays the week minute by minute from nflverse play-by-play and Sleeper's archived projections to see what the chop odds said at each moment, and computes the numbers: who was chopped and by how much, the close calls, teams that beat their projections, the waiver results and more.
+2. **Write a fact sheet.** Everything a write-up is allowed to say is collected into one plain-text fact sheet of numbers and short statements. The script also saves a prompt: the writing rules plus the fact sheet.
+3. **Write the blog text,** in one of two ways:
+   - **By the script (the default).** Fixed template sentences are filled in from the fact sheet. It is plain and formulaic, needs no AI, and always works. The page labels it "Automatic summary".
+   - **By an AI assistant or agent.** The prompt is given to an AI, which writes the recap from the fact sheet, and its reply is saved as a draft file that the script picks up on the next run. You can do this by hand (paste the prompt into an assistant, save the reply) or set up an agent that reads the prompt file and writes the draft on a schedule. The page labels it "Written by AI".
+4. **Check and build the page.** A draft is only used if it passes a checker: every number in it must appear in the fact sheet, the required sections must be there, and there is no injury talk or markdown. A draft that fails is discarded and the automatic text is used. The script then assembles the text, figures and tables into a static HTML page, which you can open locally or publish to GitHub Pages.
+
+Because the writer only ever sees the fact sheet, and the checker rejects any number that isn't in it, the text can't invent figures.
 
 ## Limits
 
@@ -51,35 +64,31 @@ The code also contains other variance models: PlayerProfiler's published CVs, an
 
 The recap pages are entirely optional: by default none are built, scheduled or published, and the app does not link to any of them.
 
-### Set it up and run the app
+### For the app
 
 You need R and the packages `shiny`, `dplyr`, `readr`, `tidyr`, `purrr`, `tibble`, `httr2`, `ggplot2`, `scales`, `patchwork`, `ggrepel`, `lpSolve` and `DT`.
 
-1. Copy `league_config.example.R` to `league_config.R` and set `LEAGUE_ID` to your Sleeper league's ID (the long number in its URL) and `APP_TITLE` to your league's name. The starting lineup, scoring and number of teams are read from Sleeper. If your league chops more than one team a week, also set `N_CHOPS_PER_WEEK`.
-2. Run `shiny::runApp()` from the project folder.
+1. **Configure your league.** Copy `league_config.example.R` to `league_config.R` and set `LEAGUE_ID` to your Sleeper league's ID (the long number in its URL) and `APP_TITLE` to your league's name. The starting lineup, scoring and number of teams are read from Sleeper. If your league chops more than one team a week, also set `N_CHOPS_PER_WEEK`.
+2. **Run it.** `shiny::runApp()` from the project folder.
+3. **Deploy it (optional).** `Rscript deploy_league.R leagues/my_league.R --name my-app --deploy` stages a clean copy for your league and deploys it to shinyapps.io. Copy `leagues/example_league.R` for each league. Set `SHINYAPPS_ACCOUNT` or pass `--account`.
 
-### Deploy the app
+### For the recap pages (optional)
 
-`Rscript deploy_league.R leagues/my_league.R --name my-app --deploy` stages a clean copy for your league and deploys it to shinyapps.io. Copy `leagues/example_league.R` for each league. Set `SHINYAPPS_ACCOUNT` or pass `--account`.
+How the pages are made is described in [How the recaps are generated](#how-the-recaps-are-generated-optional). Nothing here runs unless you run it, and you need your league set up as above.
 
-### Recap and preview pages (optional)
+**What you get just by running the scripts** (no other steps):
 
-A static page you rebuild weekly: a recap (who was chopped and why, the close calls, a replay of the chop odds over the week), a preview (odds before and after the waivers, injuries, byes, who is up for bid) and a season overview (scoreboard and waiver analysis). Nothing here runs unless you run it.
-
-**What you get just by running the scripts** (after setting your league ID, no other steps):
-
-- `Rscript collector/weekly_recap.R 2026 3` builds week 3 of 2026 into `recap/2026/index.html`; open it in a browser. Run each finished week in order so the Season overview fills in. Past weeks can be built after the fact, from nflverse play-by-play and Sleeper's archived projections.
+- `Rscript collector/weekly_recap.R 2026 3` builds week 3 of 2026 into `recap/2026/index.html`; open it in a browser. Run each finished week in order so the Season overview fills in. Past weeks can be built after the fact.
 - `Rscript collector/weekly_preview.R 2026 4` builds the preview for the coming week.
-- Every figure, table and number on the pages: the scoreboard, the odds replay, the waiver analysis, the interactive charts.
-- The written text, as **automatic text**: fixed template sentences filled in from the same numbers. It is plain and formulaic but complete, and the page labels it "Automatic summary".
-- Two files per week saved next to the page, in `recap/2026/`: the **fact sheet** of numbers (`narrative_wNN.facts.txt`) and a **ready-to-paste prompt** for an AI assistant (`narrative_wNN.prompt.txt`). The preview saves the same with `preview_wNN`.
-- Managers appear under their Sleeper usernames.
+- Every figure, table and number on the pages, with the text written by the script (the automatic text).
+- Two files per week saved next to the page in `recap/2026/`: the fact sheet (`narrative_wNN.facts.txt`) and the ready-to-paste prompt (`narrative_wNN.prompt.txt`). The preview saves the same with `preview_wNN`.
+- Managers shown under their Sleeper usernames.
 
 **What needs extra steps** (all optional):
 
-1. **AI-written text.** Paste the week's prompt file into an AI assistant, save its reply as `narrative_wNN.draft.txt` in the same folder (`preview_wNN.draft.txt` for a preview), and run the same build command again. The script checks the draft: every number must appear in the fact sheet, the required sections must be there, and there is no injury talk or markdown. If it passes, the page uses it and labels it "Written by AI". If it fails, the draft is kept as `narrative_wNN.rejected.txt`, the reason is logged, and the automatic text is used instead. Nothing is sent anywhere, and no API key is involved.
+1. **AI-written text.** Give the week's prompt file to an AI assistant or agent and save its reply as `narrative_wNN.draft.txt` in the same folder (`preview_wNN.draft.txt` for a preview), then run the same build command again. A draft that fails the checker is kept as `narrative_wNN.rejected.txt` and the reason is logged. Nothing is sent anywhere by the scripts, and no API key is involved.
 2. **Display names for managers.** The first build creates `collector/managers.csv`, listing every Sleeper username with an empty `real_name` column. Fill in a name for each, and the text uses them from the next build (`collector/managers.example.csv` shows the format).
-3. **League facts for the AI prompt** (for example, who the commissioner is). Copy `collector/league_facts.example.txt` to `collector/league_facts.txt`. They go into the prompt, so they only matter if you use step 1.
+3. **League facts for the AI prompt** (for example, who the commissioner is). Copy `collector/league_facts.example.txt` to `collector/league_facts.txt`. They go into the prompt, so they only matter for step 1.
 4. **Publishing.** Off by default. Create a separate empty public repo for your recap pages, turn on GitHub Pages for it, clone it outside this project, and put `RECAP_PAGES_DIR=/path/to/that/clone` in `~/.guillotine_recap_env`. The build then copies only the finished page and images into it and pushes; it refuses to publish into this project's repo. Free GitHub Pages needs a public repo, so the page is readable by anyone with the link. `--no-publish` builds locally only.
 5. **A weekly schedule.** Nothing is scheduled by default. The `collector/` folder has macOS `launchd` files you can install to run the builds automatically; see [`collector/README.md`](collector/README.md).
 6. **A link from the app to your published recap site.** Once you have published your recap pages to GitHub Pages (step 4), you can add a "Weekly recap" button to the top of the app that opens that site. In `league_config.R`, set `SHOW_RECAP_LINK <- TRUE` and set `RECAP_URL` to your GitHub Pages address, for example `https://YOUR_USER.github.io/YOUR_RECAP_REPO/`. It is off by default, and it only makes sense after step 4, since it links to the page you published.
