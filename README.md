@@ -2,17 +2,6 @@
 
 A live tracker for **guillotine fantasy football leagues** on [Sleeper](https://sleeper.com), where the lowest-scoring team each week is eliminated ("chopped") and its players go up for bid. It shows, while the games are being played, each team's chance of being chopped. An optional add-on writes weekly recap and preview web pages.
 
-## What's in this repo
-
-| Path | What it is |
-|---|---|
-| `app.R`, `R/` | **The live app** (R Shiny): chance of being chopped for every team, updated during games. This is the core. |
-| `collector/` | **Optional** weekly recap and preview page generator, and the tools that replay past weeks. |
-| `analysis/` | Backtests and model-checking scripts used to calibrate the probabilities. |
-| `deploy_league.R`, `leagues/` | Deploy the app to shinyapps.io for a league. |
-| `league_config.example.R` | The one setting you need: your Sleeper league ID. |
-| `docs/how-it-works.md` | The long technical write-up of the model. |
-
 The recap pages are entirely optional: by default none are built, scheduled or published, and the app does not link to any of them.
 
 **Jump to:** [Why this exists](#why-this-exists) · [How the probabilities are calculated](#how-the-probabilities-are-calculated) · [Limits](#limits) · [Adapting it to your league](#adapting-it-to-your-league) · [Recap and preview pages (optional)](#recap-and-preview-pages-optional) · [License](#license)
@@ -50,6 +39,17 @@ The code also contains other variance models: PlayerProfiler's published CVs, an
 - **macOS:** the scheduling and notification parts of the collector use macOS tools. The R code itself should run anywhere.
 
 ## Adapting it to your league
+
+### What's in this repo
+
+| Path | What it is |
+|---|---|
+| `app.R`, `R/` | **The live app** (R Shiny): chance of being chopped for every team, updated during games. This is the core. |
+| `collector/` | **Optional** weekly recap and preview page generator, and the tools that replay past weeks. |
+| `analysis/` | Backtests and model-checking scripts used to calibrate the probabilities. |
+| `deploy_league.R`, `leagues/` | Deploy the app to shinyapps.io for a league. |
+| `league_config.example.R` | The one setting you need: your Sleeper league ID. |
+| `docs/how-it-works.md` | The long technical write-up of the model. |
 
 ### Set it up and run the app
 
