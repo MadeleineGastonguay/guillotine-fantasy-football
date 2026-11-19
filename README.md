@@ -2,7 +2,7 @@
 
 A live tracker for **guillotine fantasy football leagues** on [Sleeper](https://sleeper.com), where the lowest-scoring team each week is eliminated ("chopped") and its players go up for bid. It shows, while the games are being played, each team's chance of being chopped. An optional add-on writes weekly recap and preview web pages.
 
-**Jump to:** [Why this exists](#why-this-exists) · [How the probabilities are calculated](#how-the-probabilities-are-calculated) · [How the recaps are generated](#how-the-recaps-are-generated-optional) · [Limits](#limits) · [Adapting it to your league](#adapting-it-to-your-league) · [For the app](#for-the-app) · [For the recap pages](#for-the-recap-pages-optional) · [License](#license)
+**Jump to:** [Why this exists](#why-this-exists) · [How the probabilities are calculated](#how-the-probabilities-are-calculated) · [How the recaps are generated](#how-the-recaps-are-generated-optional) · [Limits](#limits) · [Adapting it to your league](#adapting-it-to-your-league) · [For the app](#for-the-app) · [For the recap pages](#for-the-recap-pages-optional) · [How this was built](#how-this-was-built) · [License](#license)
 
 ---
 
@@ -94,6 +94,10 @@ How the pages are made is described in [How the recaps are generated](#how-the-r
 6. **A link from the app to your published recap site.** Once you have published your recap pages to GitHub Pages (step 4), you can add a "Weekly recap" button to the top of the app that opens that site. In `league_config.R`, set `SHOW_RECAP_LINK <- TRUE` and set `RECAP_URL` to your GitHub Pages address, for example `https://YOUR_USER.github.io/YOUR_RECAP_REPO/`. It is off by default, and it only makes sense after step 4, since it links to the page you published.
 
 Details of each script, the checks and scheduling are in [`collector/README.md`](collector/README.md), and the full model write-up is in [`docs/how-it-works.md`](docs/how-it-works.md).
+
+## How this was built
+
+All of the code and documentation in this repository was written by an AI coding agent (Claude Code, from Anthropic), working from my instructions. I specified what the app should do, made the modelling decisions (such as which uncertainty model to use and what to assume), and reviewed and tested the results by running it on real leagues, iterating on bugs and assumptions along the way. Treat it as agent-written code, and read the [Limits](#limits) before relying on the numbers.
 
 ## License
 
